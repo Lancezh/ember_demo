@@ -7,7 +7,10 @@
  */
 
 // create app instance
-window.Todos = Ember.Application.create();
+window.Todos = Ember.Application.create({
+    // LOGGING ROUTE CHANGES
+    LOG_TRANSITIONS: true
+});
 
 //Todos.ApplicationAdapter = DS.FixtureAdapter.extend();
 
@@ -21,18 +24,22 @@ Todos.Router.map(function () {
     this.resource('todos', { path: '/' }, function(){
         this.route('active');
         this.route('completed');
+        this.resource('detail', {path: '/todo/:todo_id'});
     });
+
 });
 
 // naming conventions
 Todos.TodosRoute = Ember.Route.extend({
     model: function () {
+//        console.log(this.store.find('todo'));
         return this.store.find('todo');
     }
 });
 
 Todos.TodosIndexRoute = Ember.Route.extend({
     model: function () {
+//        console.log(this.modelFor('todos'));
         return this.modelFor('todos');
     }
 });
@@ -40,6 +47,7 @@ Todos.TodosIndexRoute = Ember.Route.extend({
 Todos.TodosActiveRoute = Ember.Route.extend({
     model: function () {
         return this.store.filter('todo', function (todo) {
+            console.log(todo);
             return !todo.get('isCompleted');
         });
     },
@@ -60,6 +68,13 @@ Todos.TodosCompletedRoute = Ember.Route.extend({
         this.render('todos/index', {controller: controller});
     }
 });
+
+//Todos.TodoRoute = Ember.Route.extend({
+//    model: function(params){
+//        return this.store.find('todo', params.todo_id);
+//    }
+//
+//});
 
 // models
 Todos.Todo = DS.Model.extend({
@@ -97,6 +112,7 @@ Todos.TodosController = Ember.ArrayController.extend({
 
             // Create the new Todo model
             var todo = this.store.createRecord('todo', {
+                id: +new Date(),
                 title: title,
                 isCompleted: false
             });
